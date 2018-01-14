@@ -1,0 +1,20 @@
+Dir {
+    ArchiveDir "cd";
+    OverrideDir "indices";
+    CacheDir "indices";
+ };
+            
+ TreeDefault {
+    Directory "pool/";
+ };
+                    
+ BinDirectory "pool/main" {
+    Packages "dists/xenial/main/debian-installer/binary-amd64/Packages";
+    BinOverride "override";
+ };
+                                   
+ Default {
+    Packages {
+        Extensions ".udeb";
+    };
+ };

@@ -1,0 +1,152 @@
+#!/bin/bash 
+# This script is rebuilding an Ubuntu Xenial ISO installer image which can be used to
+# install ubuntu on a NERFed server.
+# It must be executed on a bare metal or within a freshly installed VM running Ubuntu Xenial Server
+# Ideally wget http://releases.ubuntu.com/16.04/ubuntu-16.04.3-server-amd64.iso
+# It will install the required package
+# DO NOT RUN THE SCRIPT on your daily machine it can remove or damage your setup
+# The script must be run as root
+# (c) 2018 Jean-Marie Verdun (verdun@splitted-desktop.com)
+# Released under GPL v2.0 license
+# https://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html
+
+\cp patch/sources.list /etc/apt
+apt-get update
+apt-get -y install linux-source-4.4.0
+apt-get -y install fakeroot
+apt-get -y install kernel-wedge
+apt-get -y install bc
+apt-get -y install libssl-dev
+apt-get -y install autoconf
+apt-get -y install libtool
+apt-get -y install libudev-dev
+apt-get -y install libpci-dev
+apt-get -y install flex
+apt-get -y install bison
+apt-get -y install asciidoc
+apt-get -y install dh-systemd
+apt-get -y install genisoimage
+apt-get -y install syslinux-utils
+apt-get -y install bsdtar
+apt-get -y install rng-tools
+apt-get -y install npt
+current_pwd=`pwd`
+
+# Let's install the linux kernel source code
+
+cd /usr/src/linux-source-4.4.0
+bunzip2 linux-source-4.4.0.tar.bz2
+tar xf linux-source-4.4.0.tar
+rm linux-source-4.4.0.tar
+mv linux-source-4.4.0/* .
+mkdir /usr/src/linux-source-4.4.0/debian/stamps/
+cd $current_pwd
+cd patch
+# The SATA module and USB UAS are directly fixed into the kernel they are not 
+# part of initrd or a specifc udeb
+cp storage-core-modules /usr/src/linux-source-4.4.0/debian.master/d-i/modules
+# We remove any related infor from UEFI support
+cp config.common.amd64 /usr/src/linux-source-4.4.0/debian.master/config/amd64/config.common.amd64
+cp config.common.ubuntu /usr/src/linux-source-4.4.0/debian.master/config/config.common.ubuntu
+cp annotations /usr/src/linux-source-4.4.0/debian.master/config/annotations
+# Just a small fix to display from where the check is performed within the script
+cp module-check /usr/src/linux-source-4.4.0/debian/scripts/module-check
+cp 2-* /usr/src/linux-source-4.4.0/debian/rules.d
+# lets' update the module list to remove the SATA and USB storage related infos otherwise udeb build will fail
+cp generic.modules /usr/src/linux-source-4.4.0/debian.master/abi/4.4.0-108.131/amd64
+cp generic.modules /usr/src/linux-source-4.4.0/debian.master/abi/4.4.0-108.131/amd64/lowlatency.modules
+cd /usr/src/linux-source-4.4.0
+# this stuff is static into the installer kernel
+rm /usr/src/linux-source-4.4.0/debian.master/d-i/modules/sata-modules
+# that stuff is super long
+fakeroot debian/rules clean
+fakeroot debian/rules binary-headers binary-generic binary-perarch
+fakeroot debian/rules binary-udebs
+cd $current_pwd
+rm ubuntu-16.04.3-server-amd64.iso
+wget http://releases.ubuntu.com/16.04/ubuntu-16.04.3-server-amd64.iso
+mkdir indices
+cd indices
+wget http://archive.ubuntu.com/ubuntu/indices/override.xenial.main
+mv override.xenial.main override
+cd ..
+cp patch/config-* .
+rm test.iso
+#unpack the iso
+\rm -rf cd
+mkdir cd
+bsdtar -C cd -xf ubuntu-16.04.3-server-amd64.iso
+# Remove the old kernel
+\rm ./cd/pool/main/l/linux/*87*
+\rm ./cd/pool/main/l/linux-meta/*
+\rm ./cd/pool/main/l/linux-meta-hwe/*
+\rm ./cd/pool/main/l/linux-hwe/*
+\rm ./cd/pool/main/l/linux-signed/*
+\cp patch/grub.cfg cd/boot/grub/
+\cp patch/ubuntu-server.seed cd/preseed
+#Update the SHA and MD5 signature
+\cp patch/config* .
+\cp cd/install/initrd.gz update_initrd/initrd.std.gz
+cd update_initrd/
+./update_initrd
+cd ..
+cp update_initrd/initrd.nerf.gz cd/install/
+\cp /usr/src/linux-source-4.4.0/debian/build/build-generic/arch/x86/boot/bzImage cd/install/vmlinuz
+cd cd/install/
+cp initrd.nerf.gz initrd.gz
+gunzip initrd.nerf.gz
+\mv initrd.nerf initrd
+cd ../..
+current_dir=`pwd`
+\cp patch/install_package /usr/src
+cp /usr/src/*.udeb cd/pool/main/l/linux
+cp /usr/src/*.deb cd/pool/main/l/linux
+cd $current_dir
+apt-ftparchive generate config-udeb
+apt-ftparchive generate config-deb
+apt-ftparchive generate config-deb64
+#update the  Release file
+apt-ftparchive -c config-rel release cd/dists/xenial/ > cd/dists/xenial/Release
+\rm -rf $HOME/.gnupg/
+killall rngd
+rngd -f -r /dev/urandom &
+gpg --batch --gen-key patch/gpg_key
+mykey=`gpg --list-keys | grep -i pub | awk '{print $2}' | awk --field-separato '/' '{print $2}'`
+echo "mykey:$mykey"
+mykey=`echo $mykey | sed 's/ //g'`
+echo "mykey:$mykey"
+\rm -rf source
+mkdir source
+cd source
+apt-get source ubuntu-keyring
+cd ubuntu-keyring-2012.05.19/keyrings
+gpg --import < ubuntu-archive-keyring.gpg
+gpg --export FBB75451 437D05B5 C0B21F32 EFE21092 $mykey > ubuntu-archive-keyring.gpg
+cd ..
+dpkg-buildpackage -k$mykey -rfakeroot -m"NERF Build <verdun@splitted-desktop.com>"
+cd ..
+\cp ubuntu-keyring*deb ../../cd/pool/main/u/ubuntu-keyring
+cd ..
+\rm -rf tmp
+mkdir tmp
+cd tmp
+cp ../cd/install/filesystem.squashfs .
+unsquashfs filesystem.squashfs
+cd squashfs-root
+cp ../../source/ubuntu-keyring-2012.05.19/keyrings/ubuntu-archive-keyring.gpg usr/share/keyrings/ubuntu-archive-keyring.gpg
+cp ../../source/ubuntu-keyring-2012.05.19/keyrings/ubuntu-archive-keyring.gpg etc/apt/trusted.gpg
+cp ../../source/ubuntu-keyring-2012.05.19/keyrings/ubuntu-archive-keyring.gpg var/lib/apt/keyrings/ubuntu-archive-keyring.gpg
+du -sx --block-size=1 ./ | cut -f1 > ../../cd/install/filesystem.size
+cd ..
+rm filesystem.squashfs
+mksquashfs squashfs-root filesystem.squashfs -b 1024k -comp xz -Xbcj x86 -e boot
+cp filesystem.squashfs ../cd/install/filesystem.squashfs
+cd ..
+\rm cd/dists/xenial/Release.gpg
+\rm cd/install/filesystem.squashfs.gpg
+gpg --default-key "$mykey" --output cd/dists/xenial/Release.gpg -ba cd/dists/xenial/Release
+gpg --default-key "$mykey" --output cd/install/filesystem.squashfs.gpg -ba cd/install/filesystem.squashfs
+
+genisoimage -o test.iso -r -J -no-emul-boot -boot-load-size 4  -boot-info-table -b isolinux/isolinux.bin -c isolinux/boot.cat ./cd
+isohybrid -partok test.iso
+

@@ -1,0 +1,6 @@
+APT::FTPArchive::Release::Codename "xenial";
+APT::FTPArchive::Release::Origin "Ubuntu";
+APT::FTPArchive::Release::Components "main";
+APT::FTPArchive::Release::Label "Ubuntu";
+APT::FTPArchive::Release::Architectures "amd64 i386";
+APT::FTPArchive::Release::Suite "testing";

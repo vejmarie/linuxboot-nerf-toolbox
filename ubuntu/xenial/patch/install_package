@@ -1,0 +1,18 @@
+#!/bin/bash
+if [ "$1" == "" ]
+then
+	echo "Usage: install_package <iso_mount_point>"
+	exit 1
+fi
+deb_list=`ls *.deb *.udeb`
+for i in $deb_list
+do
+	target=`find $1 -name $i`
+	absolute=`echo $target | sed "s|$1|.|g"`
+	cat $1/md5sum.txt | grep -v $absolute > /tmp/md5sum.txt
+	mymd5sum=`md5sum $i | awk '{print $1}'`
+	echo "$mymd5sum  $absolute" >> /tmp/md5sum.txt
+	cp /tmp/md5sum.txt $1/md5sum.txt
+\cp $i $target
+done
+

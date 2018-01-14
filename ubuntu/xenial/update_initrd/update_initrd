@@ -1,0 +1,50 @@
+#!/bin/bash 
+
+#This script shall be run on a NERF(ed) compiled linux kernel
+#It is updating a standard initrd installer with the modules required by the futur
+#kernel
+\rm -rf tmp
+mkdir tmp
+cp initrd.std.gz tmp
+cd tmp
+gunzip initrd.std.gz
+cat initrd.std  | cpio -idmv
+rm initrd.std
+
+
+kernel_version=`uname -r`
+kernel_version="4.4.0-21-generic"
+module_path=/lib/modules/$kernel_version
+
+current_version=`ls lib/modules/`
+module_list=`find lib/modules/$current_version -name '*.ko'`
+if [ "$kernel_version" == "$current_version" ]
+then
+	echo "warning: same kernel version"
+#	cd ..
+#	\rm -rf tmp
+#	exit 1
+fi
+mkdir lib/modules/$kernel_version
+for i in $module_list
+do
+#	origin=`echo $i | sed 's/$current_version/$kernel_version/'`
+	origin=`echo $i | sed  "s|$current_version|$kernel_version|g"`
+	if [ -f "/$origin" ]
+	then
+		rsync -R "/$origin" .
+		strip --strip-debug $origin
+	fi
+done
+#create destination initrd
+rm lib/modules/$kernel_version/kernel/drivers/usb/storage/usb-storage.ko
+rm lib/modules/*/kernel/drivers/usb/storage/usb-storage.ko
+cp lib/modules/$current_version/modules.order lib/modules/$kernel_version
+cp lib/modules/$current_version/modules.builtin lib/modules/$kernel_version
+cp /bin/bash bin
+cp /lib/x86_64-linux-gnu/libtinfo.so.5 lib
+chroot . depmod
+\rm ../initrd.nerf.gz
+find . | cpio -ov --format=newc | gzip -9 > ../initrd.nerf.gz
+cd ..
+#\rm -rf tmp
