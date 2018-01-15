@@ -12,8 +12,7 @@ cat initrd.std  | cpio -idmv
 rm initrd.std
 
 
-kernel_version=`uname -r`
-kernel_version="4.4.0-21-generic"
+kernel_version=$1
 module_path=/lib/modules/$kernel_version
 
 current_version=`ls lib/modules/`
