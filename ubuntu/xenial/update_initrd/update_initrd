@@ -10,9 +10,9 @@ cd tmp
 gunzip initrd.std.gz
 cat initrd.std  | cpio -idmv
 rm initrd.std
-
-
-kernel_version=$1
+new_image=`ls /usr/src/linux-image-*-generic* | grep -v extra`
+version=`echo $new_image | awk --field-separator "_" '{print $1}'`
+kernel_version=`echo $version |  sed 's/\/usr\/src\/linux-image-//'`
 module_path=/lib/modules/$kernel_version
 
 current_version=`ls lib/modules/`
