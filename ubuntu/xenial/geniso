@@ -47,6 +47,7 @@ cd patch
 cp storage-core-modules /usr/src/linux-source-4.4.0/debian.master/d-i/modules
 # We remove any related infor from UEFI support
 cp config.common.amd64 /usr/src/linux-source-4.4.0/debian.master/config/amd64/config.common.amd64
+cp config.flavour.lowlatency /usr/src/linux-source-4.4.0/debian.master/config/amd64/config.flavour.lowlatency
 cp config.common.ubuntu /usr/src/linux-source-4.4.0/debian.master/config/config.common.ubuntu
 cp annotations /usr/src/linux-source-4.4.0/debian.master/config/annotations
 # Just a small fix to display from where the check is performed within the script
