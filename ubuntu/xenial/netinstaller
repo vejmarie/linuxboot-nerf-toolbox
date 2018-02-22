@@ -1,0 +1,66 @@
+#!/bin/bash
+# update the net installer
+cd install/netboot/
+# Pick up the built kernel
+\cp /usr/src/linux-source-4.4.0/debian/build/build-generic/arch/x86/boot/bzImage ./ubuntu-installer/amd64/linux
+# We need to update the initrd
+\rm -rf Update_initrd_netboot
+mkdir Update_initrd_netboot
+cd Update_initrd_netboot
+cp ../ubuntu-installer/amd64/initrd.gz .
+\rm -rf tmp
+mkdir tmp
+cp initrd.gz tmp
+cd tmp
+gunzip initrd.gz
+cat initrd  | cpio -idmv
+rm initrd
+new_image=`ls /usr/src/linux-image-*-generic* | grep -v extra`
+version=`echo $new_image | awk --field-separator "_" '{print $1}'`
+kernel_version=`echo $version |  sed 's/\/usr\/src\/linux-image-//'`
+module_path=/lib/modules/$kernel_version
+current_version=`ls lib/modules/`
+module_list=`find lib/modules/$current_version -name '*.ko'`
+if [ "$kernel_version" == "$current_version" ]
+then
+        echo "warning: same kernel version"
+#       cd ..
+#       \rm -rf tmp
+#       exit 1
+fi
+mkdir lib/modules/$kernel_version
+for i in $module_list
+do
+#       origin=`echo $i | sed 's/$current_version/$kernel_version/'`
+        origin=`echo $i | sed  "s|$current_version|$kernel_version|g"`
+        if [ -f "/$origin" ]
+        then
+                rsync -R "/$origin" .
+                strip --strip-debug $origin
+        fi
+done
+\rm -rf lib/modules/$current_version
+#create destination initrd
+#rm lib/modules/$kernel_version/kernel/drivers/usb/storage/usb-storage.ko
+rm lib/modules/*/kernel/drivers/usb/storage/usb-storage.ko
+cp lib/modules/$current_version/modules.order lib/modules/$kernel_version
+cp lib/modules/$current_version/modules.builtin lib/modules/$kernel_version
+cp /bin/bash bin
+cp /lib/x86_64-linux-gnu/libtinfo.so.5 lib
+chroot . depmod
+\rm ../initrd.netboot.gz
+find . | cpio -ov --format=newc | gzip -9 > ../initrd.netboot.gz
+cd ..
+#\rm -rf tmp
+\cp ./initrd.netboot.gz ../ubuntu-installer/amd64/initrd.gz 
+cd ..
+\rm -rf Update_initrd_netboot
+cat ./ubuntu-installer/amd64/pxelinux.cfg/default | grep -v default >& /tmp/default
+cp /tmp/default ./ubuntu-installer/amd64/pxelinux.cfg/default
+cat  ./ubuntu-installer/amd64/boot-screens/menu.cfg | head -7 | grep -v stdmenu >& /tmp/menu
+cp /tmp/menu  ./ubuntu-installer/amd64/boot-screens/menu.cfg
+cat ./ubuntu-installer/amd64/boot-screens/txt.cfg | grep -v "menu label" | grep -v "menu default" >& /tmp/txt
+cp /tmp/txt ./ubuntu-installer/amd64/boot-screens/txt.cfg
+cat  ./ubuntu-installer/amd64/boot-screens/txt.cfg | sed 's/vga=788/console=ttyS0,57600/' >& /tmp/txt.cfg
+cp /tmp/txt.cfg ./ubuntu-installer/amd64/boot-screens/txt.cfg
+# Must update the console

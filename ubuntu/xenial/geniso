@@ -92,6 +92,12 @@ rm test.iso
 \rm -rf cd
 mkdir cd
 bsdtar -C cd -xf ubuntu-16.04.3-server-amd64.iso
+# The iso has been uncompressed into the cd directory
+local_dir=`pwd`
+cd cd
+../netinstaller
+cd $local_dir
+
 # Remove the old kernel
 \rm ./cd/pool/main/l/linux/*87*
 \rm ./cd/pool/main/l/linux-meta/*
