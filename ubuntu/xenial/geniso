@@ -55,6 +55,10 @@ cp module-check /usr/src/linux-source-4.4.0/debian/scripts/module-check
 cp 2-* /usr/src/linux-source-4.4.0/debian/rules.d
 # lets' update the module list to remove the SATA and USB storage related infos otherwise udeb build will fail
 previous_version=`ls -lt /usr/src/linux-source-4.4.0/debian.master/abi/ | tail -1 | awk '{ print $9}'`
+# Suppress reptoline check as the assembly code will be different due to UEFI support drop
+mkdir /usr/src/linux-source-4.4.0/debian.master/abi/$previous_version/amd64
+touch /usr/src/linux-source-4.4.0/debian.master/abi/$previous_version/amd64/ignore.retpoline
+/usr/src/linux-source-4.4.0/debian.master/abi/4.4.0-116.140/amd64
 cp generic.modules /usr/src/linux-source-4.4.0/debian.master/abi/$previous_version/amd64
 cp generic.modules /usr/src/linux-source-4.4.0/debian.master/abi/$previous_version/amd64/lowlatency.modules
 cd /usr/src/linux-source-4.4.0
