@@ -61,6 +61,6 @@ cat  ./ubuntu-installer/amd64/boot-screens/menu.cfg | head -7 | grep -v stdmenu 
 cp /tmp/menu  ./ubuntu-installer/amd64/boot-screens/menu.cfg
 cat ./ubuntu-installer/amd64/boot-screens/txt.cfg | grep -v "menu label" | grep -v "menu default" >& /tmp/txt
 cp /tmp/txt ./ubuntu-installer/amd64/boot-screens/txt.cfg
-cat  ./ubuntu-installer/amd64/boot-screens/txt.cfg | sed 's/vga=788/console=ttyS0,57600/' >& /tmp/txt.cfg
+cat  ./ubuntu-installer/amd64/boot-screens/txt.cfg | sed 's/vga=788/console=ttyS4,57600/' >& /tmp/txt.cfg
 cp /tmp/txt.cfg ./ubuntu-installer/amd64/boot-screens/txt.cfg
 # Must update the console
