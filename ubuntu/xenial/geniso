@@ -97,10 +97,12 @@ rm test.iso
 mkdir cd
 bsdtar -C cd -xf ubuntu-16.04.3-server-amd64.iso
 # The iso has been uncompressed into the cd directory
-local_dir=`pwd`
-cd cd
-../netinstaller
-cd $local_dir
+# this has been postponed later as we need to update the encryption key used to sign the various
+# packages into the initrd
+# local_dir=`pwd`
+# cd cd
+# ../netinstaller
+# cd $local_dir
 
 # Remove the old kernel
 \rm ./cd/pool/main/l/linux/*87*
@@ -153,6 +155,15 @@ dpkg-buildpackage -k$mykey -rfakeroot -m"NERF Build <verdun@splitted-desktop.com
 cd ..
 \cp ubuntu-keyring*deb ../../cd/pool/main/u/ubuntu-keyring
 cd ..
+
+# This is where I can update the netinstall part with the relevant initrd as it must contain
+# the key used to sign the files including the Release file
+
+cd cd
+../netinstaller $current_dir/source/ubuntu-keyring-2012.05.19/keyrings/ubuntu-archive-keyring.gpg
+cd ..
+
+
 \rm -rf tmp
 mkdir tmp
 cd tmp

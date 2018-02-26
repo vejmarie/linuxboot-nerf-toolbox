@@ -47,6 +47,9 @@ cp lib/modules/$current_version/modules.order lib/modules/$kernel_version
 cp lib/modules/$current_version/modules.builtin lib/modules/$kernel_version
 cp /bin/bash bin
 cp /lib/x86_64-linux-gnu/libtinfo.so.5 lib
+# we must copy the gpg key as to be sure that the installer will be able to authenticate the various packagesi
+cp $1 usr/share/keyrings/debian-archive-keyring.gpg
+cp $1 usr/share/keyrings/ubuntu-archive-keyring.gpg
 chroot . depmod
 \rm ../initrd.netboot.gz
 find . | cpio -ov --format=newc | gzip -9 > ../initrd.netboot.gz
@@ -63,6 +66,7 @@ cat ./ubuntu-installer/amd64/boot-screens/txt.cfg | grep -v "menu label" | grep 
 cp /tmp/txt ./ubuntu-installer/amd64/boot-screens/txt.cfg
 
 # disable authenticated check of package for net install
-cat  ./ubuntu-installer/amd64/boot-screens/txt.cfg | sed 's/vga=788/debian-installer\/allow_unauthenticated=true console=ttyS4,57600/' >& /tmp/txt.cfg
+# cat  ./ubuntu-installer/amd64/boot-screens/txt.cfg | sed 's/vga=788/debian-installer\/allow_unauthenticated=true console=ttyS4,57600/' >& /tmp/txt.cfg
+cat  ./ubuntu-installer/amd64/boot-screens/txt.cfg | sed 's/vga=788/console=ttyS4,57600/' >& /tmp/txt.cfg
 cp /tmp/txt.cfg ./ubuntu-installer/amd64/boot-screens/txt.cfg
 # Must update the console
