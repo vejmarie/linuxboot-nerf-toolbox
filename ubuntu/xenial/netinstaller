@@ -15,7 +15,9 @@ cd tmp
 gunzip initrd.gz
 cat initrd  | cpio -idmv
 # We must use a preseed that properly setup the grub parameters
-cp ../../../../patch/ubuntu-server.seed preseed.cfg
+pwd
+ls
+cp ../../../../../patch/ubuntu-server.seed preseed.cfg
 rm initrd
 new_image=`ls /usr/src/linux-image-*-generic* | grep -v extra`
 version=`echo $new_image | awk --field-separator "_" '{print $1}'`
