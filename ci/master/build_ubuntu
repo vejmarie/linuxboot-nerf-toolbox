@@ -1,0 +1,6 @@
+#!/bin/bash
+git clone https://github.com/vejmarie/linuxboot-nerf-toolbox.git
+cd linuxboot-nerf-toolbox
+cd ubuntu
+cd xenial
+sudo ./geniso

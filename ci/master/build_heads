@@ -1,0 +1,22 @@
+#!/bin/bash
+sudo apt update
+sudo apt install -y \
+	build-essential \
+	zlib1g-dev uuid-dev libdigest-sha-perl \
+	bc \
+	bzip2 \
+	bison \
+	flex \
+	git \
+	gnupg \
+	iasl \
+	m4 \
+	nasm \
+	patch \
+	python \
+	wget \
+	make
+git clone https://github.com/osresearch/heads
+mv winterfell.rom heads/blobs
+cd heads
+make BOARD=winterfell CONFIG_UROOT=n

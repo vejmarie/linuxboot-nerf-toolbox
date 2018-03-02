@@ -1,0 +1,8 @@
+#!/bin/bash
+cd job.$1
+mkdir mnt
+sudo umount /var/www/html/ubuntu/
+sudo umount /var/tftp
+sudo mount -o loop test.iso ./mnt
+sudo mount --bind /home/vejmarie/job.$1/mnt/install/netboot/ /var/tftp
+sudo mount --bind /home/vejmarie/job.$1/mnt /var/www/html/ubuntu/
