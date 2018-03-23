@@ -83,7 +83,7 @@ fi
 dpkg -i $new_image
 new_modules=`ls  /lib/modules | head -1`
 cd $current_pwd
-rm ubuntu-16.04.3-server-amd64.iso
+rm ubuntu-16.04.4-server-amd64.iso
 wget http://releases.ubuntu.com/16.04/ubuntu-16.04.4-server-amd64.iso
 mkdir indices
 cd indices
@@ -95,7 +95,7 @@ rm test.iso
 #unpack the iso
 \rm -rf cd
 mkdir cd
-bsdtar -C cd -xf ubuntu-16.04.3-server-amd64.iso
+bsdtar -C cd -xf ubuntu-16.04.4-server-amd64.iso
 # The iso has been uncompressed into the cd directory
 # this has been postponed later as we need to update the encryption key used to sign the various
 # packages into the initrd
