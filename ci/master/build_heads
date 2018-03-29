@@ -1,4 +1,5 @@
 #!/bin/bash
+date
 sudo apt update
 sudo apt install -y \
 	build-essential \
@@ -16,7 +17,23 @@ sudo apt install -y \
 	python \
 	wget \
 	make
+#git clone https://github.com/vejmarie/heads
 git clone https://github.com/osresearch/heads
-mv winterfell.rom heads/blobs
+wget http://10.0.1.2/packages/go1.9.2.linux-amd64.tar.gz
+sudo tar -C /usr/local -xzf go1.9.2.linux-amd64.tar.gz
+mkdir -p $HOME/gopath
+echo 'export GOROOT=/usr/local/go'   >> ~/.bashrc
+echo 'export GOPATH=$HOME/gopath'    >> ~/.bashrc
+echo 'export PATH=$PATH:$GOROOT/bin' >> ~/.bashrc
+
+export GOROOT=/usr/local/go
+export GOPATH=$HOME/gopath
+export PATH=$PATH:$GOROOT/bin
+
 cd heads
-make BOARD=winterfell CONFIG_UROOT=n
+wget -r http://10.0.1.2/packages/
+mv 10.0.1.2/packages/* packages
+#git checkout pkgs_cache
+mv ../winterfell.rom blobs
+time make BOARD=winterfell CONFIG_UROOT=y MAKE_JOBS="-j20 --max-load 20" UROOT_CMDS="mount boot cat insmod rsdp uinit"
+#time make BOARD=qemu-linuxboot MAKE_JOBS="-j20 --max-load=20" PKGS_PROXY="http://10.0.1.2/"

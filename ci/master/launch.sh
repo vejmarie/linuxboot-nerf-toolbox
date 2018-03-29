@@ -1,7 +1,8 @@
 #!/bin/bash
 # This script is executed on the compute node
 #SBATCH -p compile # partition (queue) 
-#SBATCH -n 20 # number of cores 
+#SBATCH -N 1 # number of nodes 
+#SBATCH -n 1 # number of cores 
 #SBATCH --mem 100 # memory pool for all cores 
 #SBATCH -t 0-2:00 # time (D-HH:MM) 
 #SBATCH -o slurm.%N.%j.out # STDOUT 
@@ -12,12 +13,10 @@ export LC_ALL=en_US.UTF-8
 machine_name=ubuntu
 
 #preparing the run
-mkdir  $HOME/images/$SLURM_JOB_ID
-ssh -o StrictHostKeyChecking=no -tt vejmarie@localhost sudo mount -t tmpfs -o size=40960m tmpfs $HOME/images/$SLURM_JOB_ID
-scp -o StrictHostKeyChecking=no $USER@bastion:/var/images/$machine_name.img $HOME/images/$SLURM_JOB_ID/$machine_name.$SLURM_JOB_ID.img
+scp -o StrictHostKeyChecking=no $USER@bastion:/var/images/$machine_name.img $HOME/images/$machine_name.$SLURM_JOB_ID.img
 # I must upload my public key into the VM otherwise I will not be able to ssh to it
 mkdir mnt.$SLURM_JOB_ID
-guestmount -a $HOME/images/$SLURM_JOB_ID/$machine_name.$SLURM_JOB_ID.img -m /dev/sda1 mnt.$SLURM_JOB_ID
+guestmount -a $HOME/images/$machine_name.$SLURM_JOB_ID.img -m /dev/sda1 mnt.$SLURM_JOB_ID
 if [ ! -f $HOME/.ssh/id_rsa.pub ]; then
 	cat /dev/zero | ssh-keygen -q -N "" > /dev/null
 fi
@@ -30,7 +29,7 @@ guestunmount mnt.$SLURM_JOB_ID
 \rm -Rf mnt.$SLURM_JOB_ID
 # We can boot the VM but we need the config file
 scp $USER@bastion:/var/images/config.$machine_name.xml $HOME/kvm/config.xml
-cat $HOME/kvm/config.xml | sed "s+IMAGE_URI+\"$HOME/images/$SLURM_JOB_ID/$machine_name.$SLURM_JOB_ID.img\"+" >& /tmp/config.new
+cat $HOME/kvm/config.xml | sed "s+IMAGE_URI+\"$HOME/images/$machine_name.$SLURM_JOB_ID.img\"+" >& /tmp/config.new
 cp /tmp/config.new $HOME/kvm/config.$SLURM_JOB_ID.xml
 cd $HOME/kvm/
 # We must change the domain name
@@ -78,26 +77,24 @@ ssh -o StrictHostKeyChecking=no sds@$myvmip hostname
 # Must copy the job into the vm
 # TODO copy into the running vm
 mkdir job.$SLURM_JOB_ID
-scp -o StrictHostKeyChecking=no $USER@bastion:build_heads job.$SLURM_JOB_ID/build_heads
-scp -o StrictHostKeyChecking=no $USER@bastion:/var/images/bios/winterfell.rom job.$SLURM_JOB_ID/winterfell.rom
-scp -o StrictHostKeyChecking=no job.$SLURM_JOB_ID/winterfell.rom sds@$myvmip:winterfell.rom
-scp -o StrictHostKeyChecking=no job.$SLURM_JOB_ID/build_heads sds@$myvmip:build_heads
-ssh -o StrictHostKeyChecking=no sds@$myvmip chmod 755 build_heads
-ssh -o StrictHostKeyChecking=no -tt sds@$myvmip ./build_heads
+scp -o StrictHostKeyChecking=no $USER@bastion:build_ubuntu job.$SLURM_JOB_ID/build_ubuntu
+scp -o StrictHostKeyChecking=no job.$SLURM_JOB_ID/build_ubuntu sds@$myvmip:build_ubuntu
+ssh -o StrictHostKeyChecking=no sds@$myvmip chmod 755 build_ubuntu
+ssh -o StrictHostKeyChecking=no -tt sds@$myvmip ./build_ubuntu
 ssh -o StrictHostKeyChecking=no sds@$myvmip ls -l
-scp sds@$myvmip:heads/build/linuxboot-git/build/winterfell/linuxboot.rom job.$SLURM_JOB_ID/linuxboot_winterfell.rom
+scp sds@$myvmip:linuxboot-nerf-toolbox/ubuntu/xenial/test.iso job.$SLURM_JOB_ID/test.iso
 # We must trasnfer the iso file to bastion
 ssh -o StrictHostKeyChecking=no $USER@bastion mkdir job.$SLURM_JOB_ID
-scp job.$SLURM_JOB_ID/linuxboot_winterfell.rom $USER@bastion:job.$SLURM_JOB_ID/linuxboot_winterfell.rom
-# ssh -o StrictHostKeyChecking=no $USER@bastion ./setup_pxe $SLURM_JOB_ID
-#rm -Rf job.$SLURM_JOB_ID
+scp job.$SLURM_JOB_ID/test.iso $USER@bastion:job.$SLURM_JOB_ID/test.iso
+ssh -o StrictHostKeyChecking=no $USER@bastion ./setup_pxe $SLURM_JOB_ID
+rm -Rf job.$SLURM_JOB_ID
+# scp $USER@bastion:/var/jobs/$1 $HOME/jobs.sh
 # Must execute the job into the vm and get the output
 
 # end of the thread
+
 virsh destroy $machine_name-$SLURM_JOB_ID
 cd $HOME/kvm/
 rm config.$SLURM_JOB_ID.xml
 #cleaning up the run
-\rm $HOME/images/$SLURM_JOB_ID/$machine_name.$SLURM_JOB_ID.img
-ssh -o StrictHostKeyChecking=no -tt vejmarie@localhost sudo umount $HOME/images/$SLURM_JOB_ID
-\rm $HOME/images/$SLURM_JOB_ID
+\rm $HOME/images/$machine_name.$SLURM_JOB_ID.img
