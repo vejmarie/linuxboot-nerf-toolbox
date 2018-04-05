@@ -26,12 +26,32 @@ fi
 echo "sds     ALL=(ALL) NOPASSWD: ALL" >> mnt.$SLURM_JOB_ID/etc/sudoers
 cat $HOME/.ssh/id_rsa.pub >& mnt.$SLURM_JOB_ID/home/sds/.ssh/authorized_keys
 chown -Rf 1000:1000 mnt.$SLURM_JOB_ID/home/sds/.ssh
+
+# Remove passwd login for root and sds as to protect the vm
+sds=`cat mnt.$SLURM_JOB_ID/etc/passwd | grep -i sds | awk -F":" '{print $1"::"$3":"$4"::"$6":"$7}'`
+root=`cat mnt.$SLURM_JOB_ID/etc/passwd | grep -i root | awk -F":" '{print $1"::"$3":"$4":"$5":"$6":"$7}'`
+grep -v root mnt.$SLURM_JOB_ID/etc/passwd > /tmp/passwd
+echo $root >> /tmp/passwd
+cp /tmp/passwd mnt.$SLURM_JOB_ID/etc/passwd
+grep -v sds mnt.$SLURM_JOB_ID/etc/passwd > /tmp/passwd
+echo $sds >> /tmp/passwd
+cp /tmp/passwd mnt.$SLURM_JOB_ID/etc/passwd
+
+
 guestunmount mnt.$SLURM_JOB_ID
 \rm -Rf mnt.$SLURM_JOB_ID
 # We can boot the VM but we need the config file
 scp $USER@bastion:/var/images/config.$machine_name.xml $HOME/kvm/config.xml
 cat $HOME/kvm/config.xml | sed "s+IMAGE_URI+\"$HOME/images/$SLURM_JOB_ID/$machine_name.$SLURM_JOB_ID.img\"+" >& /tmp/config.new
 cp /tmp/config.new $HOME/kvm/config.$SLURM_JOB_ID.xml
+
+# setup vnc port target
+local_interface=`ifconfig virbr0  | grep -Eo 'inet (addr:)?([0-9]*\.){3}[0-9]*' | grep -Eo '([0-9]*\.){3}[0-9]*'`
+vnc_ip=`echo $local_interface | awk -F"." '{print $1"."$2"."$3".0"}'`
+cat $HOME/kvm/config.$SLURM_JOB_ID.xml | sed "s/0.0.0.0/$vnc_ip/" > /tmp/config.$SLURM_JOB_ID.xml
+cp /tmp/config.$SLURM_JOB_ID.xml $HOME/kvm/config.$SLURM_JOB_ID.xml
+
+
 cd $HOME/kvm/
 # We must change the domain name
 cat $HOME/kvm/config.$SLURM_JOB_ID.xml | sed "s/<name>$machine_name/<name>$machine_name-$SLURM_JOB_ID/" >& /tmp/config.new
