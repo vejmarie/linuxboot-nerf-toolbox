@@ -122,7 +122,7 @@ wget http://archive.ubuntu.com/ubuntu/pool/main/l/linux-meta/linux-meta_4.4.0.11
 gunzip linux-meta_4.4.0.119.125.tar.gz
 tar xvf linux-meta_4.4.0.119.125.tar
 kernel_version=`cat /usr/src/linux-source-4.4.0/debian/linux-headers-4.4.0-119/DEBIAN/control | grep "Version:" | awk '{print $2}' | sed 's/-/./'`
-cat meta/debian/changelog | sed "s/4.4.0.119.125/$kernel_version" > /tmp/meta
+cat meta/debian/changelog | sed "s/4.4.0.119.125/$kernel_version/" > /tmp/meta
 cp /tmp/meta meta/debian/changelog
 cd meta
 fakeroot debian/rules binary
