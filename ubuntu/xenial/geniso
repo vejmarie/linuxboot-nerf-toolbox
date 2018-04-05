@@ -106,6 +106,7 @@ bsdtar -C cd -xf ubuntu-16.04.4-server-amd64.iso
 
 # Remove the old kernel
 \rm ./cd/pool/main/l/linux/*87*
+\rm ./cd/pool/main/l/linux/*116*
 \rm ./cd/pool/main/l/linux-meta/*
 \rm ./cd/pool/main/l/linux-meta-hwe/*
 \rm ./cd/pool/main/l/linux-hwe/*
