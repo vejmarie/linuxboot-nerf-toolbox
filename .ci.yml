@@ -3,9 +3,12 @@
 script:
   - echo "Print on stdout"
   - echo "Print on stderr" >&2
-  - cat /proc/cpuinfo > cpuinfo
-  - cat /proc/meminfo > meminfo
+  - cat /proc/cpuinfo 
+  - cat /proc/meminfo 
   - sudo echo 1
+  - cd ubuntu/xenial/
+  - pwd
+  - sudo ./geniso
 
 artifacts:
   - cpuinfo
