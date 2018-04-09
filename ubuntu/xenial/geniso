@@ -203,6 +203,10 @@ cd ..
 gpg --default-key "$mykey" --output cd/dists/xenial/Release.gpg -ba cd/dists/xenial/Release
 gpg --default-key "$mykey" --output cd/install/filesystem.squashfs.gpg -ba cd/install/filesystem.squashfs
 
+echo "starting geniso"
 genisoimage -o test.iso -r -J -no-emul-boot -boot-load-size 4  -boot-info-table -b isolinux/isolinux.bin -c isolinux/boot.cat ./cd
+echo "geniso done"
+echo "starting isohybird"
 isohybrid -partok test.iso
+echo "ishybrid done"
 
