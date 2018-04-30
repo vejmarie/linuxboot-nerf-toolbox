@@ -70,7 +70,7 @@ cat ./ubuntu-installer/amd64/boot-screens/txt.cfg | grep -v "menu label" | grep 
 cp /tmp/txt ./ubuntu-installer/amd64/boot-screens/txt.cfg
 
 # disable authenticated check of package for net install
-# cat  ./ubuntu-installer/amd64/boot-screens/txt.cfg | sed 's/vga=788/debian-installer\/allow_unauthenticated=true console=ttyS4,57600/' >& /tmp/txt.cfg
-cat  ./ubuntu-installer/amd64/boot-screens/txt.cfg | sed 's/vga=788/console=ttyS4,57600/' >& /tmp/txt.cfg
+# cat  ./ubuntu-installer/amd64/boot-screens/txt.cfg | sed 's/vga=788/debian-installer\/allow_unauthenticated=true console=ttyS0,115200/' >& /tmp/txt.cfg
+cat  ./ubuntu-installer/amd64/boot-screens/txt.cfg | sed 's/vga=788/console=ttyS0,115200/' >& /tmp/txt.cfg
 cp /tmp/txt.cfg ./ubuntu-installer/amd64/boot-screens/txt.cfg
 # Must update the console
