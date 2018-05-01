@@ -119,13 +119,12 @@ bsdtar -C cd -xf ubuntu-16.04.4-server-amd64.iso
 mkdir meta
 cd meta
 wget http://archive.ubuntu.com/ubuntu/pool/main/l/linux-meta/linux-meta_4.4.0.122.128.tar.gz
-linux-meta_4.4.0.122.128.tar.gz
 gunzip linux-meta_4.4.0.122.128.tar.gz
 tar xvf linux-meta_4.4.0.122.128.tar
 kernel_version=`cat /usr/src/linux-source-4.4.0/debian/linux-headers-4.4.0-122/DEBIAN/control | grep "Version:" | awk '{print $2}' | sed 's/-/./'`
-cat meta/debian/changelog | sed "s/4.4.0.122.128/$kernel_version/" > /tmp/meta
-cp /tmp/meta meta/debian/changelog
-cd meta
+cat linux-meta/debian/changelog | sed "s/4.4.0.122.128/$kernel_version/" > /tmp/meta
+cp /tmp/meta linux-meta/debian/changelog
+cd linux-meta
 fakeroot debian/rules binary
 cd ..
 cp *.deb ../cd/pool/main/l/linux-meta/
