@@ -17,7 +17,7 @@ d-i	oem-config-udeb/frontend	string debconf
 # Wait for two seconds in grub
 d-i	grub-installer/timeout	string 2
 # Add the network and tasks oem-config steps by default.
-d-i	preseed/late_command	string touch /target/ok ; mount --bind /dev /target/dev ; mount --bind /sys /target/sys ; mount --bind /proc /target/proc ; sed -i 's/\(GRUB_CMDLINE_LINUX_DEFAULT=\).*/\1\"console=tty0 console=ttyS0,115200n8 tsc=reliable\"/g' /target/etc/default/grub; touch /target/ok2 ; chroot /target bash -c 'update-grub' ; echo 'blacklist mei' >> /target/etc/modprobe.d/blacklist.conf ; echo 'blacklist mei_me' >> /target/etc/modprobe.d/blacklist.conf ;
-#	sed -i 's/\(GRUB_CMDLINE_LINUX_DEFAULT=\).*/\1\"console=tty0 console=ttyS0,115200n8 tsc=reliable\"/g' /etc/default/grub; \
+d-i	preseed/late_command	string touch /target/ok ; mount --bind /dev /target/dev ; mount --bind /sys /target/sys ; mount --bind /proc /target/proc ; sed -i 's/\(GRUB_CMDLINE_LINUX_DEFAULT=\).*/\1\"console=tty0 console=ttyS0,57600n8 tsc=reliable\"/g' /target/etc/default/grub; touch /target/ok2 ; chroot /target bash -c 'update-grub' ; echo 'blacklist mei' >> /target/etc/modprobe.d/blacklist.conf ; echo 'blacklist mei_me' >> /target/etc/modprobe.d/blacklist.conf ;
+#	sed -i 's/\(GRUB_CMDLINE_LINUX_DEFAULT=\).*/\1\"console=tty0 console=ttyS0,57600n8 tsc=reliable\"/g' /etc/default/grub; \
 # 	chroot /target bash -c 'update-grub'; \
 oem-config	oem-config/steps	multiselect language, timezone, keyboard, user, network, tasks
