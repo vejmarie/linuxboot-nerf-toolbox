@@ -35,5 +35,5 @@ wget -r http://10.0.1.2/packages/
 mv 10.0.1.2/packages/* packages
 #git checkout pkgs_cache
 mv ../winterfell.rom blobs
-time make BOARD=winterfell CONFIG_UROOT=y MAKE_JOBS="-j20 --max-load 20" UROOT_CMDS="mount boot cat insmod rsdp uinit pxeboot rush ls lddfiles ln losetup lsmod cat cbmem chmod chroot cmp comm console cp cpio msr dmesg ip dhclient umount"
+time make BOARD=winterfell CONFIG_UROOT=y MAKE_JOBS="-j20 --max-load 20" UROOT_CMDS="mount boot cat insmod rsdp init uinit pxeboot rush ls lddfiles ln losetup lsmod cat cbmem chmod chroot cmp comm console cp cpio msr dmesg ip dhclient umount"
 #time make BOARD=qemu-linuxboot MAKE_JOBS="-j20 --max-load=20" PKGS_PROXY="http://10.0.1.2/"
