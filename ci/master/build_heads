@@ -19,8 +19,8 @@ sudo apt install -y \
 	make
 #git clone https://github.com/vejmarie/heads
 git clone https://github.com/osresearch/heads
-wget http://10.0.1.2/packages/go1.9.2.linux-amd64.tar.gz
-sudo tar -C /usr/local -xzf go1.9.2.linux-amd64.tar.gz
+wget http://10.0.1.2/packages/go1.11.linux-amd64.tar.gz
+sudo tar -C /usr/local -xzf go1.11.linux-amd64.tar.gz
 mkdir -p $HOME/gopath
 echo 'export GOROOT=/usr/local/go'   >> ~/.bashrc
 echo 'export GOPATH=$HOME/gopath'    >> ~/.bashrc
