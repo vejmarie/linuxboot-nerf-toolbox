@@ -2,7 +2,7 @@
 # This script is rebuilding an Ubuntu Xenial ISO installer image which can be used to
 # install ubuntu on a NERFed server.
 # It must be executed on a bare metal or within a freshly installed VM running Ubuntu Xenial Server
-# Ideally wget http://releases.ubuntu.com/16.04/ubuntu-16.04.4-server-amd64.iso
+# Ideally wget http://releases.ubuntu.com/16.04/ubuntu-16.04.5-server-amd64.iso
 # It will install the required package
 # DO NOT RUN THE SCRIPT on your daily machine it can remove or damage your setup
 # The script must be run as root
@@ -83,8 +83,8 @@ fi
 dpkg -i $new_image
 new_modules=`ls  /lib/modules | head -1`
 cd $current_pwd
-rm ubuntu-16.04.4-server-amd64.iso
-wget http://releases.ubuntu.com/16.04/ubuntu-16.04.4-server-amd64.iso
+rm ubuntu-16.04.5-server-amd64.iso
+wget http://releases.ubuntu.com/16.04/ubuntu-16.04.5-server-amd64.iso
 mkdir indices
 cd indices
 wget http://archive.ubuntu.com/ubuntu/indices/override.xenial.main
@@ -95,7 +95,7 @@ rm test.iso
 #unpack the iso
 \rm -rf cd
 mkdir cd
-bsdtar -C cd -xf ubuntu-16.04.4-server-amd64.iso
+bsdtar -C cd -xf ubuntu-16.04.5-server-amd64.iso
 # The iso has been uncompressed into the cd directory
 # this has been postponed later as we need to update the encryption key used to sign the various
 # packages into the initrd
